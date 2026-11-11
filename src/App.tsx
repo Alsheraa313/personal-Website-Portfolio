@@ -47,11 +47,12 @@ const REELS: ReelItem[] = [
   {
     type: "video",
     src: "/showcase/piano.mp4",
-    title: "Piano",
-    caption: "I also enjoy playing piano.",
-    tag: "Music",
+    poster: "/showcase/piano-poster.jpg",
+    title: "...",
+    caption: "...",
+    tag: "...",
   },
-   {
+  {
     type: "image",
     src: "/showcase/drawing.jpg",
     title: "Digital art",
@@ -372,47 +373,47 @@ export default function Portfolio() {
 
       <Nav />
 
-<main className="relative z-10">
-  {/* Hero */}
-  <div className="relative overflow-hidden">
-        <SceneErrorBoundary>
-      <Suspense fallback={null}>
-        <HeroScene />
-      </Suspense>
-    </SceneErrorBoundary>
+      <main className="relative z-10">
+        {/* Hero */}
+        <div className="relative overflow-hidden">
+          <SceneErrorBoundary>
+            <Suspense fallback={null}>
+              <HeroScene />
+            </Suspense>
+          </SceneErrorBoundary>
 
-    <section id="hero" className="relative z-10 mx-auto flex min-h-svh max-w-6xl flex-col justify-center px-5 pb-16 pt-28 md:px-8">
-      <div className="hero-in mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-primary [animation-delay:100ms]">
-        <span className="h-px w-8 bg-primary sm:w-10" />
-        Software Engineer &amp; Builder
-      </div>
+          <section id="hero" className="relative z-10 mx-auto flex min-h-svh max-w-6xl flex-col justify-center px-5 pb-16 pt-28 md:px-8">
+            <div className="hero-in mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-primary [animation-delay:100ms]">
+              <span className="h-px w-8 bg-primary sm:w-10" />
+              Software Engineer &amp; Builder
+            </div>
 
-      <h1 className="hero-in mb-6 font-display text-[clamp(4.5rem,24vw,14rem)] font-extrabold uppercase leading-[0.86] tracking-tight [animation-delay:250ms]">
-        <span className="block">Mohammed</span>
-        <span className="block text-primary/70">Alsheraa</span>
-      </h1>
+            <h1 className="hero-in mb-6 font-display text-[clamp(4.5rem,24vw,14rem)] font-extrabold uppercase leading-[0.86] tracking-tight [animation-delay:250ms]">
+              <span className="block">Mohammed</span>
+              <span className="block text-primary/70">Alsheraa</span>
+            </h1>
 
-      <p className="hero-in mb-10 max-w-lg text-base font-light leading-relaxed text-muted-foreground sm:text-lg [animation-delay:400ms]">
-        CS student at University of Michigan Dearborn crafting full-stack platforms,
-        AI-powered systems, and scalable cloud architectures.
-      </p>
+            <p className="hero-in mb-10 max-w-lg text-base font-light leading-relaxed text-muted-foreground sm:text-lg [animation-delay:400ms]">
+              CS student at University of Michigan Dearborn crafting full-stack platforms,
+              AI-powered systems, and scalable cloud architectures.
+            </p>
 
-      <div className="hero-in flex flex-col gap-3 sm:flex-row [animation-delay:550ms]">
-        <a
-          href="#projects"
-          className={cn(buttonVariants({ size: "lg" }), "font-display text-lg font-bold uppercase tracking-wide")}
-        >
-          View my work <ArrowDown className="size-4" />
-        </a>
-        <a
-          href="mailto:Alsheraam@gmail.com"
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }), "font-display text-lg font-semibold uppercase tracking-wide")}
-        >
-          Get in touch
-        </a>
-      </div>
-    </section>
-  </div>
+            <div className="hero-in flex flex-col gap-3 sm:flex-row [animation-delay:550ms]">
+              <a
+                href="#projects"
+                className={cn(buttonVariants({ size: "lg" }), "font-display text-lg font-bold uppercase tracking-wide")}
+              >
+                View my work <ArrowDown className="size-4" />
+              </a>
+              <a
+                href="mailto:Alsheraam@gmail.com"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "font-display text-lg font-semibold uppercase tracking-wide")}
+              >
+                Get in touch
+              </a>
+            </div>
+          </section>
+        </div>
 
         {/* About */}
         <section id="about" className={section}>
@@ -529,13 +530,13 @@ export default function Portfolio() {
           <Separator className="mt-12" />
         </section>
 
-{/* Technical Showcase */}
-<section id="showcase" className={section}>
-  <SectionHeader label="04 — Showcase" title="A showcase." />
-  <div className="reveal">
-    <ShowcaseCarousel slides={SHOWCASE} />
-  </div>
-</section>
+        {/* Technical Showcase */}
+        <section id="showcase" className={section}>
+          <SectionHeader label="04 — Showcase" title="A showcase." />
+          <div className="reveal">
+            <ShowcaseCarousel slides={SHOWCASE} />
+          </div>
+        </section>
 
         {/* Projects */}
         <section id="projects" className={section}>
