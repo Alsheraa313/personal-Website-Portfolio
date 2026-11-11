@@ -48,9 +48,9 @@ const REELS: ReelItem[] = [
     type: "video",
     src: "/showcase/piano.mp4",
     poster: "/showcase/piano-poster.jpg",
-    title: "...",
-    caption: "...",
-    tag: "...",
+    title: "Piano",
+    caption: "I also enjoy playing piano.",
+    tag: "Music",
   },
   {
     type: "image",
@@ -368,8 +368,15 @@ export default function Portfolio() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background font-sans text-foreground">
       {/* Background blobs */}
-      <div className="pointer-events-none fixed -right-48 -top-48 -z-0 size-[600px] rounded-full bg-[#7FC8B2]/15 blur-[130px]" />
-      <div className="pointer-events-none fixed -left-40 bottom-[20%] -z-0 size-[500px] rounded-full bg-[#A7D8F2]/20 blur-[130px]" />
+      {/* Gradients instead of CSS blur filters: huge blur() layers are very slow to rasterize in Safari */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-0"
+        style={{
+          background:
+            "radial-gradient(600px circle at 100% 0%, rgba(127,200,178,.15), transparent 70%), radial-gradient(500px circle at 0% 80%, rgba(167,216,242,.2), transparent 70%)",
+        }}
+      />
 
       <Nav />
 

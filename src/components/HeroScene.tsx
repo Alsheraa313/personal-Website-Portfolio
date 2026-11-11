@@ -47,7 +47,13 @@ function useReducedMotion() {
 function hasWebGL() {
   try {
     const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    const gl = (c.getContext("webgl2") || c.getContext("webgl")) as
+      | WebGLRenderingContext
+      | WebGL2RenderingContext
+      | null;
+    // Release the probe context so it doesn't count against the browser's limit
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    return !!gl;
   } catch {
     return false;
   }
@@ -443,6 +449,19 @@ export default function HeroScene() {
   const [supported] = useState(hasWebGL);
   const [ready, setReady] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [armed, setArmed] = useState(false);
+
+  // Wait until the page has painted before spinning up WebGL
+  useEffect(() => {
+  const start = () => setArmed(true);
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(start, { timeout: 1200 });
+    return () => window.cancelIdleCallback(id);
+  }
+  // Safari doesn't have requestIdleCallback
+  const t = setTimeout(start, 400);
+  return () => clearTimeout(t);
+}, []);
 
   // Track the cursor across the whole window
   useEffect(() => {
@@ -475,15 +494,17 @@ export default function HeroScene() {
         ready ? (dark ? "opacity-100" : "opacity-90") : "opacity-0"
       }`}
     >
-      <Canvas
-        dpr={[1, 1.5]}
-        camera={{ position: [0, 0, CAM_Z], fov: 45 }}
-        frameloop={visible ? "always" : "never"}
-        gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
-        onCreated={() => setReady(true)}
-      >
-        <Scene dark={dark} reduced={reduced} mouse={mouse} />
-      </Canvas>
+      {armed && (
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 0, CAM_Z], fov: 45 }}
+          frameloop={visible ? "always" : "never"}
+          gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}
+          onCreated={() => setReady(true)}
+        >
+          <Scene dark={dark} reduced={reduced} mouse={mouse} />
+        </Canvas>
+      )}
     </div>
   );
 }
