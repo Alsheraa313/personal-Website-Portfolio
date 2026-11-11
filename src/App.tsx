@@ -54,7 +54,7 @@ const REELS: ReelItem[] = [
    {
     type: "image",
     src: "/showcase/drawing.jpg",
-    title: "Digital artpiece",
+    title: "Digital art",
     caption: "My favorite hobby has to be drawing!",
     tag: "Art",
   },
@@ -103,7 +103,7 @@ const SHOWCASE: ShowcaseSlide[] = [
     label: "Coming soon",
     render: () => (
       <div className="flex h-[min(540px,62svh)] items-center justify-center rounded-xl border border-dashed bg-secondary/30 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-        Next showcase goes here
+        Coming soon!
       </div>
     ),
   },
