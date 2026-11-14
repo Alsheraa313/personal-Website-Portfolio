@@ -4,6 +4,7 @@ import ReelsFeed, { type ReelItem } from "@/components/ReelsFeed.tsx";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ShowcaseCarousel, { type ShowcaseSlide } from "@/components/ShowcaseCarousel";
+import CardDeck, { type DeckCard } from "@/components/CardDeck.tsx";
 import {
   Card,
   CardContent,
@@ -41,13 +42,12 @@ const REELS: ReelItem[] = [
     type: "image",
     src: "/showcase/books.jpg",
     title: "My Library",
-    caption: "I love to read on my free time.",
+    caption: "I love to read in my free time.",
     tag: "Books",
   },
   {
     type: "video",
     src: "/showcase/piano.mp4",
-    poster: "/showcase/piano-poster.jpg",
     title: "Piano",
     caption: "I also enjoy playing piano.",
     tag: "Music",
@@ -60,6 +60,12 @@ const REELS: ReelItem[] = [
     tag: "Art",
   },
 
+];
+
+const DECK: DeckCard[] = [
+  { id: "one", tag: "Card 01", title: "History", body: "I've been programming for 4 years now." },
+  { id: "two", tag: "Card 02", title: "Projects", body: "Each project I've worked on taught me something new." },
+  { id: "three", tag: "Card 03", title: "Work", body: "My favorite thing about programming is problem solving." },
 ];
 
 const SHOWCASE: ShowcaseSlide[] = [
@@ -100,11 +106,22 @@ const SHOWCASE: ShowcaseSlide[] = [
     ),
   },
   {
-    id: "next",
-    label: "Coming soon",
+    id: "deck",
+    label: "Card deck",
     render: () => (
-      <div className="flex h-[min(540px,62svh)] items-center justify-center rounded-xl border border-dashed bg-secondary/30 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-        Coming soon!
+      <div className="flex min-h-[min(540px,62svh)] flex-col items-center justify-center gap-8">
+        <div className="space-y-2 text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-primary">
+            02 / Deck
+          </p>
+          <h3 className="font-display text-4xl font-bold uppercase leading-none lg:text-5xl">
+            Draw a card.
+          </h3>
+          <p className="text-base font-light text-muted-foreground">
+            Pull one to learn something about me.
+          </p>
+        </div>
+        <CardDeck cards={DECK} />
       </div>
     ),
   },
@@ -162,6 +179,73 @@ const EXPERIENCE_BULLETS: ReactNode[] = [
   <>Deployed scalable web platforms using <strong>AWS EC2 and NGINX</strong>, expanding digital outreach to 120,000+ families.</>,
   <>Refactored legacy applications into <strong>microservices</strong>, improving maintainability, scalability, and deployment efficiency.</>,
 ];
+
+/**
+ * Scroll-linked hero. Writes these CSS variables onto every [data-hero-scroll] element:
+ *   --hp  progress through the hero, 0 → 1
+ *   --hd  the scroll distance (px) that progress covers
+ *   --nt  translateY (px) that glides the big name to its docked spot
+ * Only style writes, no React state, so scrolling never re-renders anything.
+ */
+const DOCK_Y = 80; // px from the viewport top where the shrunken name settles (just under the header)
+
+function useHeroScroll() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const hero = document.getElementById("hero");
+    const name = document.querySelector<HTMLElement>("[data-hero-name]");
+    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-hero-scroll]"));
+    if (!hero || !name || targets.length === 0) return;
+
+    let dist = 1;
+    let last = -1;
+    let raf = 0;
+
+    const update = () => {
+      raf = 0;
+      const p = Math.min(1, Math.max(0, window.scrollY / dist));
+      if (p === last) return;
+      last = p;
+      const v = p.toFixed(3);
+      targets.forEach((el) => {
+        el.style.setProperty("--hp", v);
+        el.toggleAttribute("data-past", p > 0.17); // hero copy has faded: stop it catching taps
+        el.toggleAttribute("data-docked", p > 0.55); // header logo is visible: let it be tapped
+      });
+    };
+
+    // Layout reads happen here (on resize), never inside the scroll handler
+    const measure = () => {
+      dist = Math.max(1, hero.offsetHeight * 0.8);
+      let y = 0; // the name's top edge in the document
+      for (let el: HTMLElement | null = name; el; el = el.offsetParent as HTMLElement | null) {
+        y += el.offsetTop;
+      }
+      targets.forEach((el) => {
+        el.style.setProperty("--hd", `${dist}px`);
+        el.style.setProperty("--nt", `${dist + DOCK_Y - y}px`);
+      });
+      last = -1;
+      update();
+    };
+
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(hero);
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+}
 
 // ── Hooks ──────────────────────────────────────────────────────────────────
 
@@ -303,9 +387,9 @@ function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
+    <header data-hero-scroll className="fixed inset-x-0 top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-8">
-        <a href="#hero" className="font-display text-2xl font-extrabold tracking-tight text-primary">
+        <a href="#hero" className="site-logo font-display text-2xl font-extrabold tracking-tight text-primary">
           Mohammed Alsheraa
         </a>
 
@@ -362,7 +446,7 @@ function Nav() {
 
 export default function Portfolio() {
   useReveal();
-
+  useHeroScroll();
   const section = "mx-auto max-w-6xl scroll-mt-16 px-5 py-20 md:px-8 md:py-28";
 
   return (
@@ -382,7 +466,7 @@ export default function Portfolio() {
 
       <main className="relative z-10">
         {/* Hero */}
-        <div className="relative overflow-hidden">
+        <div data-hero-scroll className="relative overflow-hidden">
           <SceneErrorBoundary>
             <Suspense fallback={null}>
               <HeroScene />
@@ -390,34 +474,35 @@ export default function Portfolio() {
           </SceneErrorBoundary>
 
           <section id="hero" className="relative z-10 mx-auto flex min-h-svh max-w-6xl flex-col justify-center px-5 pb-16 pt-28 md:px-8">
-            <div className="hero-in mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-primary [animation-delay:100ms]">
-              <span className="h-px w-8 bg-primary sm:w-10" />
-              Software Engineer &amp; Builder
+                        {/* The name shrinks and glides up under the header as you scroll */}
+            <div data-hero-name className="hero-name">
+              <h1 className="hero-in mb-6 font-display text-[clamp(4.5rem,24vw,14rem)] font-extrabold uppercase leading-[0.86] tracking-tight [animation-delay:250ms]">
+                <span className="block">Mohammed</span>
+                <span className="block text-primary/70">Alsheraa</span>
+              </h1>
             </div>
 
-            <h1 className="hero-in mb-6 font-display text-[clamp(4.5rem,24vw,14rem)] font-extrabold uppercase leading-[0.86] tracking-tight [animation-delay:250ms]">
-              <span className="block">Mohammed</span>
-              <span className="block text-primary/70">Alsheraa</span>
-            </h1>
+            {/* Bio + buttons fade out quickly, scrolling at normal speed */}
+            <div className="hero-copy">
+              <p className="hero-in mb-10 max-w-lg text-base font-light leading-relaxed text-muted-foreground sm:text-lg [animation-delay:400ms]">
+                CS student at University of Michigan Dearborn crafting full-stack platforms,
+                AI-powered systems, and scalable cloud architectures.
+              </p>
 
-            <p className="hero-in mb-10 max-w-lg text-base font-light leading-relaxed text-muted-foreground sm:text-lg [animation-delay:400ms]">
-              CS student at University of Michigan Dearborn crafting full-stack platforms,
-              AI-powered systems, and scalable cloud architectures.
-            </p>
-
-            <div className="hero-in flex flex-col gap-3 sm:flex-row [animation-delay:550ms]">
-              <a
-                href="#projects"
-                className={cn(buttonVariants({ size: "lg" }), "font-display text-lg font-bold uppercase tracking-wide")}
-              >
-                View my work <ArrowDown className="size-4" />
-              </a>
-              <a
-                href="mailto:Alsheraam@gmail.com"
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "font-display text-lg font-semibold uppercase tracking-wide")}
-              >
-                Get in touch
-              </a>
+              <div className="hero-in flex flex-col gap-3 sm:flex-row [animation-delay:550ms]">
+                <a
+                  href="#projects"
+                  className={cn(buttonVariants({ size: "lg" }), "font-display text-lg font-bold uppercase tracking-wide")}
+                >
+                  View my work <ArrowDown className="size-4" />
+                </a>
+                <a
+                  href="mailto:Alsheraam@gmail.com"
+                  className={cn(buttonVariants({ variant: "outline", size: "lg" }), "font-display text-lg font-semibold uppercase tracking-wide")}
+                >
+                  Get in touch
+                </a>
+              </div>
             </div>
           </section>
         </div>
@@ -439,7 +524,7 @@ export default function Portfolio() {
                 pipelines.
               </p>
               <p>
-                Currently interning at Eternal Light, where my work has impacted{" "}
+                I've interned at Eternal Light, where my work has impacted{" "}
                 <strong>120,000+ families</strong> through scalable web platforms.
               </p>
             </div>
@@ -511,7 +596,7 @@ export default function Portfolio() {
             <div>
               <div className="font-display text-xl font-bold uppercase tracking-wide">Eternal Light</div>
               <div className="mt-1 font-mono text-[0.7rem] tracking-wider text-muted-foreground">
-                Aug 2025 – Present
+                Aug 2025 – Aug 2026
               </div>
               <div className="mt-1 font-mono text-[0.7rem] text-muted-foreground">Dearborn, MI</div>
             </div>

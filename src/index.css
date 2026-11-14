@@ -161,3 +161,60 @@
     transform: none;
   }
 }
+
+/* ── Scroll-linked hero (driven by useHeroScroll in App.tsx) ──────────────
+   --hp: progress 0→1 · --hd: distance in px · --nt: name glide in px.
+   With no JS values (or reduced motion) every var falls back to 0, so
+   everything sits at its normal, un-transformed state. */
+.hero-name {
+  transform-origin: left top;
+  transform: translate3d(0, calc(var(--hp, 0) * var(--nt, 0px)), 0)
+    scale(calc(1 - var(--hp, 0) * 0.72));
+  opacity: clamp(0, calc(1 - var(--hp, 0) * 2), 1); /* gone by 50%, before the logo appears at 55% */
+  will-change: transform, opacity;
+}
+.hero-copy {
+  opacity: calc(1 - var(--hp, 0) * 6); /* gone by ~17% */
+}
+[data-hero-scroll][data-past] .hero-copy {
+  pointer-events: none;
+}
+.site-logo {
+  opacity: clamp(0, calc((var(--hp, 0) - 0.55) * 3.5), 1);
+
+  /* Faint colour wave: the theme colour drifting toward a pale blue and back */
+  --wave: color-mix(in srgb, var(--primary) 10%, #feffff);
+  background-image: linear-gradient(
+    100deg,
+    var(--primary) 0%,
+    var(--wave) 25%,
+    var(--primary) 50%,
+    var(--wave) 75%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent; /* needed for Safari */
+  color: transparent;
+  animation: logoWave 11s linear infinite;
+}
+@keyframes logoWave {
+  from { background-position: 0% 0; }
+  to   { background-position: 200% 0; }
+}
+[data-hero-scroll]:not([data-docked]) .site-logo {
+  pointer-events: none;
+  animation-play-state: paused; /* no repainting while the logo is hidden */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-logo {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--primary);
+  }
+}
