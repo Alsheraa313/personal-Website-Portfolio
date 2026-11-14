@@ -79,7 +79,12 @@ function HandCard({
         zIndex,
         opacity: entered ? 1 : 0,
         transform: entered ? transform : enterTransform,
-        transition: entered ? `${transition}, opacity 250ms ease` : "none",
+        // "none" can't be combined with other values in a list, so build the string carefully
+        transition: !entered
+          ? "none"
+          : transition === "none"
+            ? "opacity 250ms ease"
+            : `${transition}, opacity 250ms ease`,
         willChange: "transform",
       }}
     >
@@ -354,7 +359,7 @@ export default function CardDeck({ cards }: { cards: DeckCard[] }) {
             </span>
           )}
         </button>
-        
+
       </div>
 
       {/* ── Hand ── */}
@@ -364,58 +369,56 @@ export default function CardDeck({ cards }: { cards: DeckCard[] }) {
           className="relative w-full"
           style={{ height: size.h + PAD * 2 }}
         >
-         <div
-              className="absolute inset-x-0 flex items-center justify-center rounded-xl border border-dashed px-3 text-center font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground"
-              style={{ top: PAD, height: size.h }}
-            >
-              Your draws land here
-            </div>
+          <div
+            className="absolute inset-x-0 flex items-center justify-center rounded-xl border border-dashed px-3 text-center font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground"
+            style={{ top: PAD, height: size.h }}
+          >
+            Your draws land here
+          </div>
 
-                    {/* Render in a fixed order (the order of `cards`) and find each card's slot by
-              its place in `hand`. If we rendered in hand order, React would physically
-              move DOM nodes when you reorder, which cancels their CSS transition, so
-              some cards would snap instead of sliding. */}
+          {/* Render in a fixed order (the order of `cards`) and find each card's slot by
+              its place in `hand`.. */}
           {cards
             .filter((c) => hand.some((h) => h.id === c.id))
             .map((card) => {
-            const i = hand.findIndex((h) => h.id === card.id);
-            const s = slot(i);
-            const isDragging = drag?.id === card.id;
-            const isHover = !drag && hover?.id === card.id;
+              const i = hand.findIndex((h) => h.id === card.id);
+              const s = slot(i);
+              const isDragging = drag?.id === card.id;
+              const isHover = !drag && hover?.id === card.id;
 
-            let transform = `translate(${s.x}px, ${s.y}px) rotate(${s.rot}deg)`;
-            let transition = "transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1)"; // springy settle
-            let zIndex = i + 1;
+              let transform = `translate(${s.x}px, ${s.y}px) rotate(${s.rot}deg)`;
+              let transition = "transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1)"; // springy settle
+              let zIndex = i + 1;
 
-            if (isDragging && drag) {
-              transform = `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(1.1)`;
-              transition = "none"; // follow the pointer exactly
-              zIndex = 50;
-            } else if (isHover && hover) {
-              transform =
-                `translate(${s.x}px, ${s.y - 20}px) rotate(${s.rot * 0.5}deg) ` +
-                `perspective(700px) rotateX(${hover.rx}deg) rotateY(${hover.ry}deg) scale(1.06)`;
-              transition = "transform 120ms ease-out";
-              zIndex = 40;
-            }
+              if (isDragging && drag) {
+                transform = `translate(${drag.x}px, ${drag.y}px) rotate(${tilt}deg) scale(1.1)`;
+                transition = "none"; // follow the pointer exactly
+                zIndex = 50;
+              } else if (isHover && hover) {
+                transform =
+                  `translate(${s.x}px, ${s.y - 20}px) rotate(${s.rot * 0.5}deg) ` +
+                  `perspective(700px) rotateX(${hover.rx}deg) rotateY(${hover.ry}deg) scale(1.06)`;
+                transition = "transform 120ms ease-out";
+                zIndex = 40;
+              }
 
-            return (
-              <HandCard
-                key={card.id}
-                card={card}
-                size={size}
-                transform={transform}
-                enterTransform={`translate(${s.x - 220}px, ${s.y - 30}px) rotate(-14deg) scale(0.7)`}
-                transition={transition}
-                zIndex={zIndex}
-                dragging={isDragging}
-                instant={isDragging}
-                onPointerDown={(e) => onDown(e, card.id, i)}
-                onPointerMove={(e) => onHover(e, card.id)}
-                onPointerLeave={() => setHover((h) => (h?.id === card.id ? null : h))}
-              />
-            );
-          })}
+              return (
+                <HandCard
+                  key={card.id}
+                  card={card}
+                  size={size}
+                  transform={transform}
+                  enterTransform={`translate(${s.x - 220}px, ${s.y - 30}px) rotate(-14deg) scale(0.7)`}
+                  transition={transition}
+                  zIndex={zIndex}
+                  dragging={isDragging}
+                  instant={isDragging}
+                  onPointerDown={(e) => onDown(e, card.id, i)}
+                  onPointerMove={(e) => onHover(e, card.id)}
+                  onPointerLeave={() => setHover((h) => (h?.id === card.id ? null : h))}
+                />
+              );
+            })}
         </div>
 
         <p className="h-4 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
